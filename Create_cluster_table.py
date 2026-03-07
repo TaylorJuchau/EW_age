@@ -6,8 +6,12 @@ from astropy.table import Table
 import numpy as np
 import astropy.units as u
 import re
+from matplotlib.path import Path as draw_path
+from astropy.coordinates import SkyCoord
 from Functions import *
 os.chdir('/project/galaxies') #TJ change working directory to be the parent directory
+regions = glob.glob('/project/galaxies/tjuchau/data_files/misc_data/*.deg.reg')
+m51_clusters = Table.read('/project/galaxies/tjuchau/data_files/misc_data/clusters.csv')
 
 def get_EW_using_filters(feature_filter_file, continuum_filter_files, location, radius):
     #TJ load files
@@ -100,8 +104,114 @@ for row in table:
     paEWs.append(pa_EW)
 table.add_column(paEWs, name = 'EW_187')
 table.add_column(radii, name = 'radius')
+table = table[np.isfinite(table['EW_187'])]
+
+keep_cols = ['col0', 'galaxy', 'best.attenuation.A550', 'best.nebular.logU', 
+'best.sfh.age', 'best.stellar.age_m_star', 'best.universe.luminosity_distance',
+'best.universe.redshift', 'best.stellar.m_gas', 'best.stellar.m_star', 'ra',
+'dec', 'EW_658', 'EW_187', 'radius']
+my_table = table[keep_cols]
+new_col = [None]*len(my_table)
+my_table.add_column(new_col, name = 'spec_data')
+
+
+
+def read_ds9_region(filename):
+    shapes = []
+
+    with open(filename) as f:
+        for line in f:
+            line = line.strip()
+
+            if line.startswith("polygon"):
+                coords = line[8:-1]
+                vals = np.array(coords.split(","), dtype=float)
+                ra = vals[0::2]
+                dec = vals[1::2]
+                shapes.append(("polygon", np.column_stack((ra, dec))))
+
+            if line.startswith("box"):
+                vals = line[4:-1].split(",")
+
+                ra = float(vals[0])
+                dec = float(vals[1])
+
+                width = float(vals[2].replace('"','')) / 3600
+                height = float(vals[3].replace('"','')) / 3600
+                angle = float(vals[4])
+
+                shapes.append(("box", (ra, dec, width, height, angle)))
+
+    return shapes
+
+
+def points_in_box(points, ra_c, dec_c, width, height, angle):
+    """
+    points: Nx2 array of RA,Dec
+    width/height in degrees
+    angle in degrees
+    """
+
+    # offsets
+    dx = (points[:,0] - ra_c) * np.cos(np.radians(dec_c))
+    dy = (points[:,1] - dec_c)
+
+    theta = np.radians(angle)
+
+    xr = dx*np.cos(theta) + dy*np.sin(theta)
+    yr = -dx*np.sin(theta) + dy*np.cos(theta)
+
+    return (np.abs(xr) <= width/2) & (np.abs(yr) <= height/2)
+
+
+# Load regions
+all_shapes = []
+for f in regions:
+    all_shapes.extend(read_ds9_region(f))
+
+
+points = np.column_stack((m51_clusters["ra_gaia"], m51_clusters["dec_gaia"]))
+inside_any = np.zeros(len(points), dtype=bool)
+
+
+for shape in all_shapes:
+
+    if shape[0] == "polygon":
+        path = draw_path(shape[1])
+        inside_any |= path.contains_points(points)
+
+    if shape[0] == "box":
+        ra, dec, w, h, ang = shape[1]
+        inside_any |= points_in_box(points, ra, dec, w, h, ang)
+
+
+region_id = np.full(len(points), -1)
+
+for i, shape in enumerate(all_shapes):
+
+    if shape[0] == "polygon":
+        mask = draw_path(shape[1]).contains_points(points)
+
+    if shape[0] == "box":
+        ra, dec, w, h, ang = shape[1]
+        mask = points_in_box(points, ra, dec, w, h, ang)
+
+    region_id[mask] = i
+
+m51_clusters["region_id"] = region_id
+clusters_in_regions = m51_clusters[inside_any]
+m51_f150w = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f150w_i2d_anchor.fits'
+m51_f187n = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f187n_i2d_anchor.fits'
+m51_f300m = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f300m_i2d_anchor.fits'
+for i, row in enumerate(clusters_in_regions):
+    loc = [row['ra_gaia'], row['dec_gaia']]
+    pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
+    new_row = [i, "M51", None, None, row['age_best_yr']/1e6, 
+    None, None, None, row['mass_best_msun']/2, row['mass_best_msun']/2, 
+    row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, regions[row['region_id']]]
+    my_table.add_row(new_row)
 try:
-    table.write(output_path, format='csv', overwrite=True)
+    my_table.write(output_path, format='csv', overwrite=True)
     print(f"Table successfully saved to {output_path}")
 except Exception as e:
     print(f"Error saving table: {e}")
