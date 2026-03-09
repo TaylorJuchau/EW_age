@@ -13,6 +13,10 @@ os.chdir('/project/galaxies') #TJ change working directory to be the parent dire
 regions = glob.glob('/project/galaxies/tjuchau/data_files/misc_data/*.deg.reg')
 m51_clusters = Table.read('/project/galaxies/tjuchau/data_files/misc_data/clusters.csv')
 
+m51_f150w = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f150w_i2d_anchor.fits'
+m51_f187n = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f187n_i2d_anchor.fits'
+m51_f300m = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f300m_i2d_anchor.fits'
+
 def get_EW_using_filters(feature_filter_file, continuum_filter_files, location, radius):
     #TJ load files
 
@@ -64,58 +68,6 @@ def get_EW_using_filters(feature_filter_file, continuum_filter_files, location, 
     
         return EW
 
-kiana_files = np.concatenate([glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1433*nircam*.csv'),
-glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1512*nircam*.csv'),
-glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1672*nircam*.csv')])
-
-names = ['ngc1433', 'ngc1512', 'ngc1672']
-table = Table.read(kiana_files[0])
-table.add_column([names[0]]*len(table), index=0, name = 'galaxy')
-for i, file in enumerate(kiana_files):
-    if i ==0:
-        continue
-    tab = Table.read(file)
-    tab.add_column([names[i]]*len(tab), index=0, name = 'galaxy')
-    for row in tab:
-        table.add_row(row)
-
-paEWs = []
-radii = []
-for row in table:
-    loc = [row['ra'], row['dec']]
-    distance = (row['best.universe.luminosity_distance']*u.m).to(u.pc)
-
-    gal_name = row['galaxy']
-    if gal_name == 'ngc1433':
-        physical_size = 14.7*u.pc
-    elif gal_name == 'ngc1512':
-        physical_size = 13.9*u.pc
-    elif gal_name == 'ngc1672':
-        physical_size = 15*u.pc
-
-    radius = np.arcsin(physical_size/distance).to(u.arcsec)
-    radii.append(radius)
-
-    files = glob.glob(f'tjuchau/data_files/JWST/images/{gal_name.upper()}/*')
-    f150 = [x for x in files if extract_filter_name(x)=='F150W'][0]
-    f187 = [x for x in files if extract_filter_name(x)=='F187N'][0]
-    f300 = [x for x in files if extract_filter_name(x)=='F300M'][0]
-    pa_EW = get_EW_using_filters(f187, [f150,f300], loc, radius)
-    paEWs.append(pa_EW)
-table.add_column(paEWs, name = 'EW_187')
-table.add_column(radii, name = 'radius')
-table = table[np.isfinite(table['EW_187'])]
-
-keep_cols = ['col0', 'galaxy', 'best.attenuation.A550', 'best.nebular.logU', 
-'best.sfh.age', 'best.stellar.age_m_star', 'best.universe.luminosity_distance',
-'best.universe.redshift', 'best.stellar.m_gas', 'best.stellar.m_star', 'ra',
-'dec', 'EW_658', 'EW_187', 'radius']
-my_table = table[keep_cols]
-new_col = [None]*len(my_table)
-my_table.add_column(new_col, name = 'spec_data')
-
-
-
 def read_ds9_region(filename):
     shapes = []
 
@@ -163,6 +115,60 @@ def points_in_box(points, ra_c, dec_c, width, height, angle):
 
     return (np.abs(xr) <= width/2) & (np.abs(yr) <= height/2)
 
+kiana_files = np.concatenate([glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1433*nircam*.csv'),
+glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1512*nircam*.csv'),
+glob.glob('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ngc1672*nircam*.csv')])
+
+names = ['ngc1433', 'ngc1512', 'ngc1672']
+table = Table.read(kiana_files[0])
+table.add_column([names[0]]*len(table), index=0, name = 'galaxy')
+for i, file in enumerate(kiana_files):
+    if i ==0:
+        continue
+    tab = Table.read(file)
+    tab.add_column([names[i]]*len(tab), index=0, name = 'galaxy')
+    for row in tab:
+        table.add_row(row)
+
+paEWs = []
+radii = []
+print('Generating EW for ngc1433, ngc1512, and ngc1672 clusters')
+for row in table:
+    loc = [row['ra'], row['dec']]
+    distance = (row['best.universe.luminosity_distance']*u.m).to(u.pc)
+
+    gal_name = row['galaxy']
+    if gal_name == 'ngc1433':
+        physical_size = 14.7*u.pc
+    elif gal_name == 'ngc1512':
+        physical_size = 13.9*u.pc
+    elif gal_name == 'ngc1672':
+        physical_size = 15*u.pc
+
+    radius = np.arcsin(physical_size/distance).to(u.arcsec)
+    radii.append(radius)
+
+    files = glob.glob(f'tjuchau/data_files/JWST/images/{gal_name.upper()}/*')
+    f150 = [x for x in files if extract_filter_name(x)=='F150W'][0]
+    f187 = [x for x in files if extract_filter_name(x)=='F187N'][0]
+    f300 = [x for x in files if extract_filter_name(x)=='F300M'][0]
+    pa_EW = get_EW_using_filters(f187, [f150,f300], loc, radius)
+    paEWs.append(pa_EW)
+table.add_column(paEWs, name = 'EW_187')
+table.add_column(radii, name = 'radius')
+table = table[np.isfinite(table['EW_187'])]
+
+keep_cols = ['col0', 'galaxy', 'best.attenuation.A550', 'best.nebular.logU', 
+'best.sfh.age', 'best.stellar.age_m_star', 'best.universe.luminosity_distance',
+'best.universe.redshift', 'best.stellar.m_gas', 'best.stellar.m_star', 'ra',
+'dec', 'EW_658', 'EW_187', 'radius']
+my_table = table[keep_cols]
+new_col = [None]*len(my_table)
+my_table.add_column(new_col, name = 'spec_data')
+
+
+    
+
 
 # Load regions
 all_shapes = []
@@ -197,19 +203,25 @@ for i, shape in enumerate(all_shapes):
         mask = points_in_box(points, ra, dec, w, h, ang)
 
     region_id[mask] = i
-
+print('Generating EW for M51 clusters')
 m51_clusters["region_id"] = region_id
-clusters_in_regions = m51_clusters[inside_any]
-m51_f150w = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f150w_i2d_anchor.fits'
-m51_f187n = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f187n_i2d_anchor.fits'
-m51_f300m = '/project/galaxies/tjuchau/data_files/JWST/images/v0p3p2/ngc5194/ngc5194_nircam_lv3_f300m_i2d_anchor.fits'
-for i, row in enumerate(clusters_in_regions):
+progress = 0
+for i, row in enumerate(m51_clusters):
+    if row['age_best_yr'] == 0 or row['mass_best_msun'] == 0:
+        continue
+    if i/(len(m51_clusters)) > progress:
+        print(f'cluster {i} out of {len(m51_clusters)}', end='\r')
     loc = [row['ra_gaia'], row['dec_gaia']]
+    region_name = regions[row['region_id']].split(".")[-3]
+    spec_files = glob.glob(f'/project/galaxies/tjuchau/data_files/JWST/nirspec/karin_reduction_v1_oct2024/*o{region_name}_*')
     pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
     new_row = [i, "M51", None, None, row['age_best_yr']/1e6, 
     None, None, None, row['mass_best_msun']/2, row['mass_best_msun']/2, 
-    row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, regions[row['region_id']]]
+    row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, spec_files]
     my_table.add_row(new_row)
+#clusters_in_regions = m51_clusters[inside_any]
+
+
 try:
     my_table.write(output_path, format='csv', overwrite=True)
     print(f"Table successfully saved to {output_path}")
