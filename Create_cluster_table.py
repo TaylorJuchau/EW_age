@@ -206,19 +206,23 @@ for i, shape in enumerate(all_shapes):
 print('Generating EW for M51 clusters')
 m51_clusters["region_id"] = region_id
 progress = 0
-for i, row in enumerate(m51_clusters):
+for i, row in enumerate(m51_clusters[:50]):
     if row['age_best_yr'] == 0 or row['mass_best_msun'] == 0:
         continue
     if i/(len(m51_clusters)) > progress:
         print(f'cluster {i} out of {len(m51_clusters)}', end='\r')
     loc = [row['ra_gaia'], row['dec_gaia']]
     region_name = regions[row['region_id']].split(".")[-3]
-    spec_files = glob.glob(f'/project/galaxies/tjuchau/data_files/JWST/nirspec/karin_reduction_v1_oct2024/*o{region_name}_*')
     pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
     new_row = [i, "M51", None, None, row['age_best_yr']/1e6, 
     None, None, None, row['mass_best_msun']/2, row['mass_best_msun']/2, 
-    row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, spec_files]
+    row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, region_name]
     my_table.add_row(new_row)
+    try:
+        my_table.write(output_path, format='csv', overwrite=True)
+        print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
+    except Exception as e:
+        print(f"Error saving table: {e}")
 #clusters_in_regions = m51_clusters[inside_any]
 
 
