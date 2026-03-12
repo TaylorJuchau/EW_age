@@ -206,7 +206,7 @@ for i, shape in enumerate(all_shapes):
 print('Generating EW for M51 clusters')
 m51_clusters["region_id"] = region_id
 progress = 0
-for i, row in enumerate(m51_clusters[:50]):
+for i, row in enumerate(m51_clusters):
     if row['age_best_yr'] == 0 or row['mass_best_msun'] == 0:
         continue
     if i/(len(m51_clusters)) > progress:
