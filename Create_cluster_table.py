@@ -217,7 +217,8 @@ for i, row in enumerate(m51_clusters):
     new_row = [i, "M51", None, None, row['age_best_yr']/1e6, 
     None, None, None, row['mass_best_msun']/2, row['mass_best_msun']/2, 
     row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, region_name]
-    my_table.add_row(new_row)
+    if np.isfinite(pa_EW):
+        my_table.add_row(new_row)
     try:
         my_table.write(output_path, format='csv', overwrite=True)
         print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
