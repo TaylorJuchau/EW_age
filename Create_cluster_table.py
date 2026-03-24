@@ -226,7 +226,6 @@ for i, row in enumerate(m51_clusters):
         print(f"Error saving table: {e}")
 #clusters_in_regions = m51_clusters[inside_any]
 
-
 try:
     my_table.write(output_path, format='csv', overwrite=True)
     print(f"Table successfully saved to {output_path}")
