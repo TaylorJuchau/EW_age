@@ -12,7 +12,7 @@ table = Table.read('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/ful
 
 for row in table:
     loc = [row['ra'], row['dec']]
-    radius = row['radius']
+    radius = row['radius']*u.arcsec
     galaxy_name = row['galaxy']
     if galaxy_name == "M51":
         hst_file = '/project/galaxies/tjuchau/data_files/HST/ngc5194/F555W_NGC5194_ACS_WFC_drc.fits'
@@ -38,7 +38,7 @@ for row in table:
         f187_file = '/project/galaxies/tjuchau/data_files/JWST/images/NGC1672/ngc1672_nircam_lv3_f187n_i2d_anchor.fits'
         f300_file = '/project/galaxies/tjuchau/data_files/JWST/images/NGC1672/ngc1672_nircam_lv3_f300m_i2d_anchor.fits'
         cont_sub_file = '/project/galaxies/tjuchau/data_files/JWST/images/NGC1672/ngc1672_nircam_lv3_f187n_i2d_anchor_cont_subtracted.fits'
-    ew = get_EW_using_filters(f187_file, [f150_file, f300_file], loc, radius)
+    ew = get_EW_using_filters(f187_file, [f150_file, f300_file], loc, radius).value
     row['EW_187'] = ew
 try:
     table.write(output_path, format='csv', overwrite=True)
