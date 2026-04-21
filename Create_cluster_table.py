@@ -1,4 +1,4 @@
-output_path = '/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/full_table.csv'
+output_path = '/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/test_full_table.csv'
 import os
 os.chdir('/project/galaxies') #TJ change working directory to be the parent directory
 import glob
@@ -162,12 +162,10 @@ keep_cols = ['col0', 'galaxy', 'best.attenuation.A550', 'best.nebular.logU',
 'best.sfh.age', 'best.stellar.age_m_star', 'best.universe.luminosity_distance',
 'best.universe.redshift', 'best.stellar.m_gas', 'best.stellar.m_star', 'ra',
 'dec', 'EW_658', 'EW_187', 'radius']
-my_table = table[keep_cols]
+#my_table = table[keep_cols]
+my_table = table.copy()
 new_col = [None]*len(my_table)
 my_table.add_column(new_col, name = 'spec_data')
-
-
-    
 
 
 # Load regions
@@ -206,14 +204,46 @@ for i, shape in enumerate(all_shapes):
 print('Generating EW for M51 clusters')
 m51_clusters["region_id"] = region_id
 progress = 0
+print(my_table.colnames)
+
 for i, row in enumerate(m51_clusters):
     if row['age_best_yr'] == 0 or row['mass_best_msun'] == 0:
         continue
     if i/(len(m51_clusters)) > progress:
         print(f'cluster {i} out of {len(m51_clusters)}', end='\r')
+    new_row = {col: None for col in my_table.colnames}
+    new_row['col0'] = i
+    new_row['id'] = 0
+    new_row['grid'] = 'unclassed'
+    # Fill required fields
+    new_row['galaxy'] = 'M51'
+
+    # --- map M51 columns into your schema ---
+    new_row['ra'] = row['ra_gaia']
+    new_row['dec'] = row['dec_gaia']
+
+    new_row['best.sfh.age'] = row['age_best_yr'] / 1e6
+    new_row['best.stellar.m_star'] = row['mass_best_msun'] / 2
+    new_row['best.stellar.m_gas'] = row['mass_best_msun'] / 2
+
+    new_row['EW_187'] = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], [new_row['ra'], new_row['dec']], 0.3*u.arcsec)
+    new_row['radius'] = 0.3
+    region_name = regions[row['region_id']].split(".")[-3]
+    new_row['spec_data'] = region_name
+
+    # Add row
+    if np.isfinite(pa_EW):
+        my_table.add_row(new_row)
+    try:
+        my_table.write(output_path, format='csv', overwrite=True)
+        print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
+    except Exception as e:
+        print(f"Error saving table: {e}")
+    '''
     loc = [row['ra_gaia'], row['dec_gaia']]
     region_name = regions[row['region_id']].split(".")[-3]
-    pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
+    #pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
+    pa_EW = 0
     new_row = [i, "M51", None, None, row['age_best_yr']/1e6, 
     None, None, None, row['mass_best_msun']/2, row['mass_best_msun']/2, 
     row['ra_gaia'], row['dec_gaia'], None, pa_EW, 0.3, region_name]
@@ -223,7 +253,7 @@ for i, row in enumerate(m51_clusters):
         my_table.write(output_path, format='csv', overwrite=True)
         print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
     except Exception as e:
-        print(f"Error saving table: {e}")
+        print(f"Error saving table: {e}")'''
 #clusters_in_regions = m51_clusters[inside_any]
 
 try:

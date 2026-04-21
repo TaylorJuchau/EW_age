@@ -1,0 +1,35 @@
+
+# Basic setup
+model_name cluster_lib
+out_dir {slug_output}
+sim_type cluster
+n_trials 50000
+
+# Cluster properties
+cluster_mass cmf
+imf kroupa.imf
+
+# Time sampling
+log_time 1
+time_step 0.1
+start_time 1e5
+end_time 1e8
+
+# Metallicity
+metallicity 0.143
+
+# Nebular emission (IMPORTANT for F187N)
+compute_nebular 1
+nebular_phi 0.7
+
+# Extinction
+A_V 0.0
+
+# Photometry filters (you MUST define JWST filters)
+phot_mode L_nu
+phot_bands JWST_F150W, JWST_F187N, JWST_F200W, JWST_F300M
+
+# Output
+out_cluster_phot 1
+out_cluster 1
+output_mode binary

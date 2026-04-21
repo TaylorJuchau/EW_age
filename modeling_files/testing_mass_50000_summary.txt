@@ -1,0 +1,36 @@
+SLUG WAS RUN WITH THE FOLLOWING PARAMETERS
+model_name           testing_mass_50000
+out_dir              /project/galaxies/tjuchau/projects/EW_vs_Age/modeling_files
+sim_type             cluster
+n_trials             100
+time_step            1e+06
+start_time           1e+06
+end_time             1e+07
+imf_integrator_tol     0.001
+IMF                  /project/galaxies/tjuchau/software/Slug/slug2/lib/imf/chabrier.imf
+CMF                  /project/galaxies/tjuchau/software/Slug/slug2/lib/cmf/slug_default.cmf
+cluster_mass         50000
+CLF                  /project/galaxies/tjuchau/software/Slug/slug2/lib/clf/nodisrupt.clf
+tracks               mist_2016_vvcrit_40
+atmospheres          /project/galaxies/tjuchau/software/Slug/slug2/lib/atmospheres
+yield_dir            /project/galaxies/tjuchau/software/Slug/slug2/lib/yields
+min_stoch_mass       0.08
+redshift             0
+metallicity          1
+specsyn_mode         sb99
+yield_mode           SNII: Sukhbold+16; AGB: Karakas & Lugaro 2016 + Doherty+ 2014
+A_V                  /project/galaxies/tjuchau/software/Slug/slug2/lib/avdist/slug_default.av
+extinction_curve     /project/galaxies/tjuchau/software/Slug/slug2/lib/extinct/MW_EXT_SLUG.dat
+nebular_emission     yes
+nebular_phi          0.73
+nebular_logU         -2.5
+phot_mode            L_nu
+out_cluster          1
+out_cluster_phot     1
+out_cluster_spec     0
+out_cluster_sn       1
+out_cluster_yield    1
+out_cluster_ew       0
+out_cluster_winds    1
+phot_bands           JWST_F150W, JWST_F187N, JWST_F300M
+output_mode          ascii
