@@ -1,0 +1,29 @@
+model_name testing_specs50000
+out_dir /project/galaxies/tjuchau/data_files/misc_data/slug_outputs
+verbosity 1
+sim_type cluster
+n_trials 100
+time_step 1000000.0
+end_time 1.0e7
+cluster_mass 50000
+out_cluster 1
+out_cluster_phot 1
+out_cluster_spec 1
+out_cluster_yield 1
+output_mode ascii
+clf lib/clf/nodisrupt.clf
+tracks mist_2016_vvcrit_00
+atmospheres lib/atmospheres
+specsyn_mode sb99
+clust_frac 1.0
+min_stoch_mass 0.08
+A_V lib/avdist/slug_default.av
+extinction_curve lib/extinct/MW_EXT_SLUG.dat
+nebular_extinction_factor lib/avdist/neb_factor_default.av
+compute_nebular 1
+nebular_logU -2.5
+nebular_phi 0.73
+phot_bands JWST_F150W, JWST_F187N, JWST_F300M, QH0
+yield_dir lib/yields
+yield_mode sukhbold16+karakas16+doherty14
+

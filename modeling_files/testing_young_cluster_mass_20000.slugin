@@ -23,7 +23,7 @@ nebular_extinction_factor lib/avdist/neb_factor_default.av
 compute_nebular 1
 nebular_logU -2.5
 nebular_phi 0.73
-phot_bands JWST_F150W, JWST_F187N, JWST_F300M
+phot_bands JWST_F150W, JWST_F187N, JWST_F300M, QH0
 yield_dir lib/yields
 yield_mode sukhbold16+karakas16+doherty14
 

@@ -7,12 +7,17 @@ from matplotlib.path import Path
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 import numpy as np
+output_path = '/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/complete_updated_table.csv'
+ryan_path = '/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/full_table_ryan.csv'
 #TJ To create table of galaxies, run tjuchau/projects/EW_vs_Age/Create_cluster_table.py
-table = Table.read('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/full_table.csv')
-
-for row in table:
-    loc = [row['ra'], row['dec']]
+bigger_table = Table.read('/project/galaxies/tjuchau/data_files/Kiana_Cluster_Files/test_full_table.csv')
+Ryan_table = Table.read(ryan_path)
+for i, row in enumerate(bigger_table):
+    row['ra'] = Ryan_table[i]['ra']
+    row['dec'] = Ryan_table[i]['dec']
+    row['radius'] = Ryan_table[i]['radius']
     radius = row['radius']*u.arcsec
+    loc = [Ryan_table[i]['ra'], Ryan_table[i]['dec']]
     galaxy_name = row['galaxy']
     if galaxy_name == "M51":
         hst_file = '/project/galaxies/tjuchau/data_files/HST/ngc5194/F555W_NGC5194_ACS_WFC_drc.fits'
@@ -41,9 +46,8 @@ for row in table:
     ew = get_EW_using_filters(f187_file, [f150_file, f300_file], loc, radius).value
     row['EW_187'] = ew
 try:
-    table.write(output_path, format='csv', overwrite=True)
+    bigger_table.write(output_path, format='csv', overwrite=True)
     print(f"Table successfully saved to {output_path}")
 except Exception as e:
     print(f"Error saving table: {e}")
 
-    

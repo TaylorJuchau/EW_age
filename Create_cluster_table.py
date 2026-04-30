@@ -204,7 +204,7 @@ for i, shape in enumerate(all_shapes):
 print('Generating EW for M51 clusters')
 m51_clusters["region_id"] = region_id
 progress = 0
-print(my_table.colnames)
+#print(my_table.colnames)
 
 for i, row in enumerate(m51_clusters):
     if row['age_best_yr'] == 0 or row['mass_best_msun'] == 0:
@@ -232,14 +232,14 @@ for i, row in enumerate(m51_clusters):
     new_row['spec_data'] = region_name
 
     # Add row
-    if np.isfinite(pa_EW):
+    if np.isfinite(new_row['EW_187']):
         my_table.add_row(new_row)
     try:
         my_table.write(output_path, format='csv', overwrite=True)
         print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
     except Exception as e:
         print(f"Error saving table: {e}")
-    '''
+    
     loc = [row['ra_gaia'], row['dec_gaia']]
     region_name = regions[row['region_id']].split(".")[-3]
     #pa_EW = get_EW_using_filters(m51_f187n, [m51_f150w, m51_f300m], loc, 0.3*u.arcsec)
@@ -253,7 +253,7 @@ for i, row in enumerate(m51_clusters):
         my_table.write(output_path, format='csv', overwrite=True)
         print(f"Table with {len(my_table)} rows successfully saved to {output_path}")
     except Exception as e:
-        print(f"Error saving table: {e}")'''
+        print(f"Error saving table: {e}")
 #clusters_in_regions = m51_clusters[inside_any]
 
 try:
