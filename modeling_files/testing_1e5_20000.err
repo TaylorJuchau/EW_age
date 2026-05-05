@@ -1,3 +1,0 @@
-slug: warning: minimum IMF mass 0.08 Msun < minimum evolution track mass 0.1 Msun. Calculation will proceed, but stars with mass 0.08 Msun to 0.1 Msun will be treated as having zero luminosity.
-slug: warning: minimum IMF mass 0.08 Msun < minimum yield table mass 1 Msun. Calculation will proceed, but stars with mass 0.08 Msun to 1 Msun will be treated as having zero yield.
-

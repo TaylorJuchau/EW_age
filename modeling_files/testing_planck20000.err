@@ -1,5 +1,0 @@
-slug: warning: minimum IMF mass 0.08 Msun < minimum evolution track mass 0.1 Msun. Calculation will proceed, but stars with mass 0.08 Msun to 0.1 Msun will be treated as having zero luminosity.
-slug: warning: minimum IMF mass 0.08 Msun < minimum yield table mass 1 Msun. Calculation will proceed, but stars with mass 0.08 Msun to 1 Msun will be treated as having zero yield.
-slug: error: mistmatch in continuum wavelength grid between nebular and stellar data!
-
-ERROR conda.cli.main_run:execute(124): `conda run /project/galaxies/tjuchau/software/Slug/slug2/bin/slug /project/galaxies/tjuchau/projects/EW_vs_Age/modeling_files/testing_planck20000.slugin` failed. (See above for error)
