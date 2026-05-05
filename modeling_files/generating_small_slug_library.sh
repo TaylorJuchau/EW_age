@@ -3,12 +3,14 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=tjuchau@uwyo.edu
             
-#SBATCH --job-name=generating_slug_library
-#SBATCH --output=generating_slug_library.out
-#SBATCH --error=generating_slug_library.err
-#SBATCH --time=8:00:00
-#SBATCH --mem=8G
-#SBATCH --cpus-per-task=4
+#SBATCH --job-name=generating_small_slug_library
+#SBATCH --output=generating_small_slug_library.out
+#SBATCH --error=generating_small_slug_library.err
+#SBATCH --time=48:00:00
+#SBATCH --mem=64G
+#SBATCH --cpus-per-task=30
+#SBATCH --nodes=1
+
 source ~/.bashrc
 conda activate Modeling
 cd /cluster/medbow/project/galaxies/tjuchau/projects/EW_vs_Age/modeling_files
