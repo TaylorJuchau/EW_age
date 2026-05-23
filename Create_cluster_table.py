@@ -218,7 +218,7 @@ for i, row in enumerate(m51_clusters):
     # Fill required fields
     new_row['galaxy'] = 'M51'
 
-    # --- map M51 columns into your schema ---
+    # --- map M51 columns into correct formats ---
     new_row['ra'] = row['ra_gaia']
     new_row['dec'] = row['dec_gaia']
 
