@@ -222,7 +222,7 @@ for i, row in enumerate(m51_clusters):
     new_row['ra'] = row['ra_gaia']
     new_row['dec'] = row['dec_gaia']
 
-    new_row['best.sfh.age'] = row['age_best_yr'] / 1e6
+    new_row['best.stellar.age_m_star'] = row['age_best_yr'] / 1e6
     new_row['best.stellar.m_star'] = row['mass_best_msun'] / 2
     new_row['best.stellar.m_gas'] = row['mass_best_msun'] / 2
 
